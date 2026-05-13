@@ -1,0 +1,24 @@
+---
+// 匯入剛剛寫好的 Vue 按鈕
+import AddToCartButton from './AddToCartButton.vue';
+
+const { title, description, price, icon } = Astro.props;
+---
+
+<div class="bg-white rounded-2xl shadow-sm hover:shadow-2xl transition-all duration-300 overflow-hidden group cursor-pointer border border-gray-100">
+  <div class="h-64 relative overflow-hidden bg-amber-50">
+    <div class="absolute inset-0 flex items-center justify-center text-amber-800 text-opacity-50 text-xl font-bold">
+      {icon} 圖片空間
+    </div>
+  </div>
+  <div class="p-6">
+    <h3 class="text-xl font-bold text-gray-800 mb-2 group-hover:text-amber-600 transition-colors">{title}</h3>
+    <p class="text-sm text-gray-500 mb-6 line-clamp-2">{description}</p>
+    <div class="flex justify-between items-center">
+      <span class="text-2xl font-black text-amber-700">NT$ {price}</span>
+      
+      <AddToCartButton client:load itemName={title} itemPrice={Number(price)} />
+      
+    </div>
+  </div>
+</div>
