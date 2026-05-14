@@ -1,1 +1,6 @@
 npm run dev
+git add .
+
+git commit -m "feat: 修正 Vercel 適配器並完成後端登入驗證"
+
+git push

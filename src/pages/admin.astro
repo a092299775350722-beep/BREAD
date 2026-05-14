@@ -1,0 +1,24 @@
+---
+// 引入全域樣式與 Vue 元件
+import '../styles/global.css';
+import AdminPanel from '../components/AdminPanel.vue';
+---
+
+<html lang="zh-TW">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>管理員後台 - 姊姊的麵包坊</title>
+  </head>
+  <body class="bg-[#FDFBF7] min-h-screen py-12 px-6">
+    
+    <div class="max-w-3xl mx-auto mb-6">
+      <a href="/" class="text-amber-700 hover:text-amber-900 font-bold inline-block">
+        ← 回到前台首頁
+      </a>
+    </div>
+
+    <AdminPanel client:load />
+
+  </body>
+</html>

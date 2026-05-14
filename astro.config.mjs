@@ -1,12 +1,11 @@
 import { defineConfig } from 'astro/config';
 import tailwindcss from '@tailwindcss/vite';
 import vue from '@astrojs/vue';
+import vercel from '@astrojs/vercel'; // 部署時要用這個
 
 export default defineConfig({
-  // ⚠️ 因為改用 Vercel 部署，所以把下面這兩行刪除！
-  // site: 'https://你的GitHub帳號.github.io', 
-  // base: '/你的儲存庫名稱', 
-  
+  output: 'server',
+  adapter: vercel(), // 加上這一行
   vite: {
     plugins: [tailwindcss()]
   },
