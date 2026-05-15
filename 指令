@@ -1,6 +1,4 @@
 npm run dev
 git add .
-
-git commit -m "feat: 測試版本"
-
+git commit -m "feat: 修改"
 git push
