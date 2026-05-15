@@ -1,55 +1,51 @@
-import { atom } from 'nanostores';
+import { atom, map } from 'nanostores';
 
-export const cartItems = atom({}); 
+// 購物車內容：用 map 儲存物件，key 是商品名稱
+export const cartItems = map({});
+
+// 側邊欄開關：用 atom 儲存布林值
 export const isCartOpen = atom(false);
 
-// 🌟 新增：讓網頁具備記憶能力 (localStorage)
-if (typeof window !== 'undefined') {
-  // 1. 網頁剛載入時，去瀏覽器找找看有沒有上次沒結帳的購物車
-  const savedCart = localStorage.getItem('sister-bakery-cart');
-  if (savedCart) {
-    cartItems.set(JSON.parse(savedCart));
-  }
-
-  // 2. 只要購物車有變動，就自動存檔到瀏覽器裡
-  cartItems.listen((newValue) => {
-    localStorage.setItem('sister-bakery-cart', JSON.stringify(newValue));
-  });
-}
-
-// === 以下保留你原本的邏輯 ===
-export function addCartItem({ name, price }) {
-  const currentCart = cartItems.get();
-  if (currentCart[name]) {
-    cartItems.set({
-      ...currentCart,
-      [name]: { ...currentCart[name], quantity: currentCart[name].quantity + 1 }
+// 加入商品函式
+export function addCartItem(item) {
+  const current = cartItems.get();
+  const existing = current[item.name];
+  if (existing) {
+    cartItems.setKey(item.name, {
+      ...existing,
+      quantity: existing.quantity + 1,
     });
   } else {
-    cartItems.set({
-      ...currentCart,
-      [name]: { name, price, quantity: 1 }
+    cartItems.setKey(item.name, {
+      name: item.name,
+      price: Number(item.price),
+      quantity: 1,
     });
   }
 }
 
+// 增加數量
 export function increaseQty(name) {
-  const currentCart = cartItems.get();
-  cartItems.set({
-    ...currentCart,
-    [name]: { ...currentCart[name], quantity: currentCart[name].quantity + 1 }
-  });
+  const current = cartItems.get()[name];
+  if (current) {
+    cartItems.setKey(name, {
+      ...current,
+      quantity: current.quantity + 1,
+    });
+  }
 }
 
+// 減少數量
 export function decreaseQty(name) {
-  const currentCart = cartItems.get();
-  if (currentCart[name].quantity > 1) {
-    cartItems.set({
-      ...currentCart,
-      [name]: { ...currentCart[name], quantity: currentCart[name].quantity - 1 }
-    });
-  } else {
-    const { [name]: _, ...rest } = currentCart;
-    cartItems.set(rest);
+  const current = cartItems.get()[name];
+  if (current) {
+    if (current.quantity <= 1) {
+      cartItems.setKey(name, undefined);
+    } else {
+      cartItems.setKey(name, {
+        ...current,
+        quantity: current.quantity - 1,
+      });
+    }
   }
 }

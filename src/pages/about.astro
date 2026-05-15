@@ -1,0 +1,53 @@
+---
+import Navbar from '../components/Navbar.astro';
+import Footer from '../components/Footer.astro';
+import '../styles/global.css';
+---
+
+<html lang="zh-TW">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>關於我們 - 姊姊的手作麵包坊</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      body { background: #fef7e8; }
+    </style>
+  </head>
+  <body>
+    <Navbar />
+    <main class="max-w-4xl mx-auto px-6 py-16">
+      <!-- 主視覺區塊 -->
+      <div class="bg-white rounded-3xl shadow-xl overflow-hidden">
+        <div class="bg-amber-800 py-12 text-center relative">
+          <div class="absolute top-0 left-0 w-full h-full opacity-10 bg-repeat bg-cover" style="background-image: url('https://www.transparenttextures.com/patterns/bread.png');"></div>
+          <div class="relative">
+            <div class="text-7xl mb-3">🥐</div>
+            <h1 class="text-4xl font-bold text-white">關於我們</h1>
+            <div class="w-24 h-1 bg-amber-400 mx-auto mt-4 rounded-full"></div>
+          </div>
+        </div>
+        <div class="p-8 space-y-6 text-gray-700 leading-relaxed">
+          <p class="text-lg font-medium text-amber-800">「姊姊的手作麵包坊」—— 一份揉進愛與時間的滋味。</p>
+          <p>我們相信，好的麵包不需要華麗的裝飾，而是來自對原料的堅持與對發酵的耐心。從日本進口的麵粉、法國頂級發酵奶油，到自家培養的天然酵母，每一口都能吃到單純的麥香與溫潤的口感。</p>
+          <p>創辦人「姊姊」原本只是為了讓家人吃得健康而開始烘焙，沒想到親友間口耳相傳，漸漸成了週末限定的預購小店。目前我們僅開放週末預購，並提供自取服務，希望透過網路預訂的方式，讓您能在最新鮮的時候享用到剛出爐的美味。</p>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 my-6">
+            <div class="bg-amber-50 rounded-2xl p-5 text-center">
+              <div class="text-4xl mb-2">🌾</div>
+              <h3 class="font-bold">嚴選食材</h3>
+              <p class="text-sm text-stone-600">進口麵粉、法國奶油、台灣在地小農產品</p>
+            </div>
+            <div class="bg-amber-50 rounded-2xl p-5 text-center">
+              <div class="text-4xl mb-2">⏳</div>
+              <h3 class="font-bold">低溫發酵</h3>
+              <p class="text-sm text-stone-600">12~24小時低溫熟成，風味更佳</p>
+            </div>
+          </div>
+          <p>未來我們也會陸續推出季節限定口味，並持續分享烘焙日常與食譜，歡迎追蹤我們的粉絲專頁！</p>
+          <div class="text-center text-amber-600 text-sm mt-4">—— 用心手作，只為您 ——</div>
+        </div>
+      </div>
+    </main>
+    <Footer />
+  </body>
+</html>
