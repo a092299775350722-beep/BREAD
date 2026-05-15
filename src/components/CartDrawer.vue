@@ -96,7 +96,9 @@
           <!-- 填寫表單畫面底部 -->
           <div v-if="view === 'form'" class="flex gap-3">
             <button @click="view = 'cart'" class="flex-1 border border-stone-200 text-stone-600 py-2 rounded-xl hover:bg-stone-50">← 返回購物車</button>
-            <button @click="submitOrder" :disabled="errors.name || errors.phone || !form.name.trim() || !form.phone.trim()" class="flex-1 bg-amber-600 text-white py-2 rounded-xl hover:bg-amber-700">確認訂購</button>
+            <button @click="submitOrder" :disabled="isSubmitting || errors.name || errors.phone || !form.name.trim() || !form.phone.trim()" class="flex-1 bg-amber-600 text-white py-2 rounded-xl hover:bg-amber-700">
+              {{ isSubmitting ? '處理中...' : '確認訂購' }}
+            </button>
           </div>
 
           <!-- 訂單完成畫面底部 -->
@@ -120,6 +122,8 @@
 import { ref, computed, onMounted } from 'vue';
 import { useStore } from '@nanostores/vue';
 import { cartItems, isCartOpen, increaseQty, decreaseQty } from '../store/cartStore.js';
+// 新增這一行，放在其他 ref 附近
+const isSubmitting = ref(false);
 
 const $cartItems = useStore(cartItems);
 const $isCartOpen = useStore(isCartOpen);
@@ -161,39 +165,50 @@ const validateField = (field) => {
 };
 
 // 提交訂單
-const submitOrder = () => {
-  // 先驗證兩個欄位
+const submitOrder = async () => {
+  // 如果正在送出，直接返回
+  if (isSubmitting.value) return;
+  
+  // 驗證欄位
   validateField('name');
   validateField('phone');
   
   if (errors.value.name || errors.value.phone) {
-    return; // 有錯誤就不送出
+    return;
   }
-
-  // 建立訂單
-  const orderId = Date.now();
-  const order = {
-    id: orderId,
-    date: new Date().toLocaleString(),
-    customer: {
-      name: form.value.name.trim(),
-      phone: form.value.phone.trim(),
-      note: form.value.note || ''
-    },
-    items: Object.values($cartItems.value),
-    total: totalPrice.value,
-    status: '待處理'
-  };
-  const existingOrders = JSON.parse(localStorage.getItem('orders') || '[]');
-  existingOrders.push(order);
-  localStorage.setItem('orders', JSON.stringify(existingOrders));
-
-  // 清空購物車
-  cartItems.set({});
-
-  // 儲存訂單編號並切換到完成畫面
-  lastOrderId.value = orderId.toString();
-  view.value = 'complete';
+  
+  // 開始送出
+  isSubmitting.value = true;
+  
+  // 模擬一個短暫的延遲（實際儲存 localStorage 很快，但為了讓 loading 有感）
+  // 你可以保留這個 setTimeout，也可以直接執行，因為 localStorage 是同步的。
+  // 為了體驗，加上一個微小的延遲讓按鈕狀態變化可見。
+  await new Promise(resolve => setTimeout(resolve, 300));
+  
+  try {
+    const orderId = Date.now();
+    const order = {
+      id: orderId,
+      date: new Date().toLocaleString(),
+      customer: {
+        name: form.value.name.trim(),
+        phone: form.value.phone.trim(),
+        note: form.value.note || ''
+      },
+      items: Object.values($cartItems.value),
+      total: totalPrice.value,
+      status: '待處理'
+    };
+    const existingOrders = JSON.parse(localStorage.getItem('orders') || '[]');
+    existingOrders.push(order);
+    localStorage.setItem('orders', JSON.stringify(existingOrders));
+    
+    cartItems.set({});
+    lastOrderId.value = orderId.toString();
+    view.value = 'complete';
+  } finally {
+    isSubmitting.value = false;
+  }
 };
 
 // 關閉側邊欄並重置
