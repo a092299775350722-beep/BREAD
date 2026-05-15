@@ -12,12 +12,12 @@ import '../styles/global.css';
     <title>訂單查詢 - 姊姊的手作麵包坊</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-      body { background: #fef7e8; }
+      body { background: #fef7e8; margin: 0; }
     </style>
   </head>
-  <body>
+  <body class="min-h-screen flex flex-col">
     <Navbar />
-    <main class="max-w-2xl mx-auto py-12 px-4">
+    <main class="flex-1 max-w-2xl mx-auto w-full py-12 px-4">
       <OrderStatusWidget client:load />
     </main>
     <Footer />

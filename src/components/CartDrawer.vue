@@ -3,8 +3,8 @@
     <div v-if="$isCartOpen" class="fixed inset-0 z-50 flex justify-end">
       <div @click="closeDrawer" class="absolute inset-0 bg-black/40 backdrop-blur-sm transition-all"></div>
 
-      <div class="relative w-full max-w-md bg-gradient-to-br from-amber-50 to-white h-full shadow-2xl flex flex-col animate-slide-in">
-        <!-- 頭部 (共用) -->
+      <div class="relative w-full sm:max-w-md bg-gradient-to-br from-amber-50 to-white h-full shadow-2xl flex flex-col animate-slide-in">
+        <!-- 頭部 -->
         <div class="flex justify-between items-center p-6 border-b border-amber-200 bg-white/80 backdrop-blur-sm">
           <div class="flex items-center gap-3">
             <span class="text-3xl">{{ view === 'cart' ? '🛒' : '📝' }}</span>
@@ -15,7 +15,7 @@
           <button @click="closeDrawer" class="w-8 h-8 rounded-full bg-gray-100 hover:bg-black/40 text-gray-500 flex items-center justify-center transition-colors">✕</button>
         </div>
 
-        <!-- 動態內容區：根據 view 狀態切換 -->
+        <!-- 動態內容區 -->
         <div class="flex-1 overflow-y-auto p-6">
           <!-- 畫面 1：購物車商品列表 -->
           <div v-if="view === 'cart'">
@@ -44,12 +44,12 @@
           <div v-if="view === 'form'" class="space-y-5">
             <div>
               <label class="block text-stone-700 text-sm font-medium mb-1">收件人姓名 *</label>
-              <input v-model="form.name" type="text" class="w-full border border-stone-200 rounded-xl px-4 py-2 focus:ring-2 focus:ring-amber-400 outline-none" :class="{'border-red-400': errors.name}" placeholder="陳小美" />
+              <input v-model="form.name" @input="validateField('name')" type="text" class="w-full border border-stone-200 rounded-xl px-4 py-2 focus:ring-2 focus:ring-amber-400 outline-none" :class="{'border-red-400': errors.name}" placeholder="陳小美" />
               <p v-if="errors.name" class="text-red-500 text-xs mt-1">{{ errors.name }}</p>
             </div>
             <div>
               <label class="block text-stone-700 text-sm font-medium mb-1">聯絡電話 *</label>
-              <input v-model="form.phone" type="tel" class="w-full border border-stone-200 rounded-xl px-4 py-2 focus:ring-2 focus:ring-amber-400 outline-none" :class="{'border-red-400': errors.phone}" placeholder="0912-345-678" />
+              <input v-model="form.phone" @input="validateField('phone')" type="tel" class="w-full border border-stone-200 rounded-xl px-4 py-2 focus:ring-2 focus:ring-amber-400 outline-none" :class="{'border-red-400': errors.phone}" placeholder="0912-345-678" />
               <p v-if="errors.phone" class="text-red-500 text-xs mt-1">{{ errors.phone }}</p>
             </div>
             <div>
@@ -78,9 +78,9 @@
           </div>
         </div>
 
-        <!-- 底部按鈕區 (根據不同畫面顯示不同按鈕) -->
+        <!-- 底部按鈕區 -->
         <div class="border-t border-amber-200 bg-white/90 backdrop-blur-sm p-6 space-y-3">
-          <!-- 購物車畫面的底部 -->
+          <!-- 購物車畫面底部 -->
           <div v-if="view === 'cart'">
             <div class="flex justify-between items-center text-xl mb-4">
               <span class="text-gray-600">總計金額</span>
@@ -93,13 +93,13 @@
             </button>
           </div>
 
-          <!-- 填寫表單畫面的底部 -->
+          <!-- 填寫表單畫面底部 -->
           <div v-if="view === 'form'" class="flex gap-3">
             <button @click="view = 'cart'" class="flex-1 border border-stone-200 text-stone-600 py-2 rounded-xl hover:bg-stone-50">← 返回購物車</button>
-            <button @click="submitOrder" class="flex-1 bg-stone-800 text-white py-2 rounded-xl hover:bg-black">確認訂購</button>
+            <button @click="submitOrder" :disabled="errors.name || errors.phone || !form.name.trim() || !form.phone.trim()" class="flex-1 bg-amber-600 text-white py-2 rounded-xl hover:bg-amber-700">確認訂購</button>
           </div>
 
-          <!-- 訂單完成畫面的底部 -->
+          <!-- 訂單完成畫面底部 -->
           <div v-if="view === 'complete'">
             <button @click="closeDrawerAndReset" class="w-full bg-amber-600 text-white py-3 rounded-xl font-bold hover:bg-amber-700">
               繼續選購
@@ -124,14 +124,14 @@ import { cartItems, isCartOpen, increaseQty, decreaseQty } from '../store/cartSt
 const $cartItems = useStore(cartItems);
 const $isCartOpen = useStore(isCartOpen);
 
-// 控制目前顯示的畫面：'cart'（商品列表）、'form'（填寫表單）、'complete'（完成）
+// 控制目前顯示的畫面
 const view = ref('cart');
 
 // 表單資料與錯誤
 const form = ref({ name: '', phone: '', note: '' });
 const errors = ref({ name: '', phone: '' });
 
-// 最後產生的訂單編號（用於完成畫面）
+// 最後產生的訂單編號
 const lastOrderId = ref('');
 
 // 計算總金額
@@ -139,37 +139,36 @@ const totalPrice = computed(() => {
   return Object.values($cartItems.value).reduce((sum, item) => sum + (item.price * item.quantity), 0);
 });
 
-// 關閉側邊欄並重置所有狀態（回到購物車畫面）
-const closeDrawer = () => {
-  isCartOpen.set(false);
-  // 延遲重置，避免關閉動畫時視圖閃爍
-  setTimeout(() => {
-    if (!$isCartOpen.value) {
-      view.value = 'cart';
-      form.value = { name: '', phone: '', note: '' };
-      errors.value = { name: '', phone: '' };
+// 驗證單一欄位
+const validateField = (field) => {
+  if (field === 'name') {
+    if (!form.value.name.trim()) {
+      errors.value.name = '請填寫收件人姓名';
+    } else {
+      errors.value.name = '';
     }
-  }, 300);
-};
-
-// 從購物車切換到填寫表單
-const goToForm = () => {
-  view.value = 'form';
+  }
+  if (field === 'phone') {
+    const phoneRegex = /^09\d{8}$/;
+    if (!form.value.phone.trim()) {
+      errors.value.phone = '請填寫聯絡電話';
+    } else if (!phoneRegex.test(form.value.phone)) {
+      errors.value.phone = '請輸入正確的手機號碼 (09xxxxxxxx)';
+    } else {
+      errors.value.phone = '';
+    }
+  }
 };
 
 // 提交訂單
 const submitOrder = () => {
-  // 驗證
-  let valid = true;
-  if (!form.value.name.trim()) {
-    errors.value.name = '請填寫收件人姓名';
-    valid = false;
+  // 先驗證兩個欄位
+  validateField('name');
+  validateField('phone');
+  
+  if (errors.value.name || errors.value.phone) {
+    return; // 有錯誤就不送出
   }
-  if (!form.value.phone.trim()) {
-    errors.value.phone = '請填寫聯絡電話';
-    valid = false;
-  }
-  if (!valid) return;
 
   // 建立訂單
   const orderId = Date.now();
@@ -189,7 +188,7 @@ const submitOrder = () => {
   existingOrders.push(order);
   localStorage.setItem('orders', JSON.stringify(existingOrders));
 
-  // 清空購物車（Nanostore）
+  // 清空購物車
   cartItems.set({});
 
   // 儲存訂單編號並切換到完成畫面
@@ -197,7 +196,18 @@ const submitOrder = () => {
   view.value = 'complete';
 };
 
-// 從完成畫面關閉側邊欄並重置
+// 關閉側邊欄並重置
+const closeDrawer = () => {
+  isCartOpen.set(false);
+  setTimeout(() => {
+    if (!$isCartOpen.value) {
+      view.value = 'cart';
+      form.value = { name: '', phone: '', note: '' };
+      errors.value = { name: '', phone: '' };
+    }
+  }, 300);
+};
+
 const closeDrawerAndReset = () => {
   isCartOpen.set(false);
   setTimeout(() => {
@@ -209,12 +219,15 @@ const closeDrawerAndReset = () => {
   }, 300);
 };
 
-// 跳轉到訂單查詢頁面（選擇性，如果你有 order-status 頁面）
+const goToForm = () => {
+  view.value = 'form';
+};
+
 const goToOrderStatus = () => {
   window.location.href = '/order-status';
 };
 
-// 頁面載入時，如果 localStorage 有清除購物車標記，就清空購物車（保留相容之前）
+// 頁面載入時清除購物車標記
 onMounted(() => {
   if (localStorage.getItem('shouldClearCart') === 'true') {
     cartItems.set({});
